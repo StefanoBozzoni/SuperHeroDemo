@@ -4,34 +4,26 @@ import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.example.superheroesdemo.data.remote.AppService
-import com.example.superheroesdemo.domain.model.SuperHeroCharacter
+import com.example.superheroesdemo.data.remote.dtos.CharactersResult
 
 class CharactersPagingSource(
     private val appService: AppService,
     private val query: String
-): PagingSource<Int, SuperHeroCharacter>() {
+): PagingSource<Int, CharactersResult>() {
 
     val STARTING_PAGE = 0
-    override fun getRefreshKey(state: PagingState<Int, SuperHeroCharacter>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, CharactersResult>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
             state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
                 ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
         }
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SuperHeroCharacter> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CharactersResult> {
         return try {
             val page = params.key ?: STARTING_PAGE
             Log.d("XDEBUG", "page num $page")
-            val superHeroesList = appService.getCharacters(searchText = query.ifEmpty { null }, offset = page * 20, limit = 20).body()?.data?.results?.map {
-                SuperHeroCharacter(
-                    id = it.id,
-                    description = it.description,
-                    name = it.name,
-                    resourceURI = it.resourceURI,
-                    thumbnailUrl = it.thumbnail.path + "." + it.thumbnail.extension
-                )
-            } ?: emptyList()
+            val superHeroesList = appService.getCharacters(searchText = query.ifEmpty { null }, offset = page * 20, limit = 20).body()?.data?.results.orEmpty()
             LoadResult.Page(
                 data = superHeroesList,
                 prevKey = if (page == STARTING_PAGE) null else page.minus(1),

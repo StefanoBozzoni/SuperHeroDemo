@@ -1,4 +1,4 @@
-package com.example.superheroesdemo.presentation
+package com.example.superheroesdemo.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class MainViewModel(
+class SearchViewModel(
     private val getSuperHeroUC: GetSuperHeroesUsecase
 ): ViewModel() {
 
@@ -19,16 +19,15 @@ class MainViewModel(
         get() = _superHeroFlow
 
     init {
-        getSHCharacters("")
+       getSHCharacters("")
     }
 
     fun getSHCharacters(queryState: String) {
-        _superHeroFlow =  MutableStateFlow(PagingData.empty())
         viewModelScope.launch {
+            _superHeroFlow =  MutableStateFlow(PagingData.empty())
             getSuperHeroUC.execute(GetSuperHeroesUsecase.Params(queryState))
                 .cachedIn(this)
                 .collect { _superHeroFlow.value = it }
         }
     }
-
 }

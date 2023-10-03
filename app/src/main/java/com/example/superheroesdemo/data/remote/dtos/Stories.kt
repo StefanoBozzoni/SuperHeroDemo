@@ -1,8 +1,8 @@
-package com.example.superheroesdemo.data.remote.dtos.toremove
+package com.example.superheroesdemo.data.remote.dtos
 
 data class Stories(
     val available: Int,
     val collectionURI: String,
-    val items: List<ItemXXX>,
+    val items: List<ItemIdentification>,
     val returned: Int
 )

@@ -1,4 +1,4 @@
-package com.example.superheroesdemo.data.remote.dtos.toremove
+package com.example.superheroesdemo.data.remote.dtos
 
 data class CaractersUrl(
     val type: String,

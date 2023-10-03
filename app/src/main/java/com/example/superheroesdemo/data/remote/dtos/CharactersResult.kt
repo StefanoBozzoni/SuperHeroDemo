@@ -7,9 +7,9 @@ data class CharactersResult(
     val name: String,
     val resourceURI: String,
     val thumbnail: CharactersThumbnail,
-    //val series: Series,
-    //val stories: Stories,
-    //val events: Events,
-    //val comics: Comics,
-    //val urls: List<CaractersUrl>
+    val series: Series?,
+    val stories: Stories?,
+    val events: Events?,
+    val comics: Comics?,
+    val urls: List<CaractersUrl>?
 )

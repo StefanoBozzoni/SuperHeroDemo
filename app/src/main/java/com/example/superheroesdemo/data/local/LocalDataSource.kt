@@ -13,11 +13,11 @@ class LocalDataSource(private val database: AppDatabase) {
         database.favoritesDao().deleteFavorite(favoritesItem)
     }
 
-    suspend fun getFavoriteMovies(): List<FavoritesItem>? {
+    suspend fun getFavoriteItemList(): List<FavoritesItem>? {
         return database.favoritesDao().getFavoriteCarachersList()
     }
 
-    suspend fun getFavoriteMovie(id: Int): Boolean {
+    suspend fun getFavoriteItem(id: Int): Boolean {
         return (database.favoritesDao().getFavoriteCharacter(id) != null)
     }
 
