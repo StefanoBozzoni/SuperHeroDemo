@@ -90,13 +90,10 @@ fun DetailContent(characterDetailInfo: CharacterDetailInfo?, paddingValues: Padd
         mutableStateOf(characterDetailInfo.favorite)
     }
 
-    val superHero = characterDetailInfo.superHeroCharacter
     Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.padding(paddingValues)) {
-        Column(
-            //modifier = Modifier.verticalScroll(state = rememberScrollState(), enabled = true)
-        ) {
+        Column {
             LazyColumn(modifier = Modifier.wrapContentHeight(), contentPadding = PaddingValues(all=16.dp)) {
-                headerSuperHero(superHero)
+                headerSuperHero(characterDetailInfo.superHeroCharacter)
                 resourcesList("Comics", characterDetailInfo.comics)
                 resourcesList("Series", characterDetailInfo.series)
                 resourcesList("Stories", characterDetailInfo.stories)
