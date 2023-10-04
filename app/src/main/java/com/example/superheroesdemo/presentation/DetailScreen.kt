@@ -3,7 +3,6 @@ package com.example.superheroesdemo.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +33,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -76,7 +77,13 @@ fun DetailScreen(viewModelInstance: DetailViewModel = koinViewModel(), character
             )
         },
         content = { paddingValues->
-            DetailContent(characterDetailInfo, paddingValues, viewModelInstance)
+            if (characterDetailInfo == null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+            else
+                DetailContent(characterDetailInfo, paddingValues, viewModelInstance)
         },
     )
 }
@@ -91,15 +98,13 @@ fun DetailContent(characterDetailInfo: CharacterDetailInfo?, paddingValues: Padd
     }
 
     Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.padding(paddingValues)) {
-        Column {
-            LazyColumn(modifier = Modifier.wrapContentHeight(), contentPadding = PaddingValues(all=16.dp)) {
-                headerSuperHero(characterDetailInfo.superHeroCharacter)
-                resourcesList("Comics", characterDetailInfo.comics)
-                resourcesList("Series", characterDetailInfo.series)
-                resourcesList("Stories", characterDetailInfo.stories)
-                resourcesList("events", characterDetailInfo.events)
-                resourcesList("links", characterDetailInfo.urls?.map { ItemIdentification(name=it.type, resourceURI = it.url) }, {})
-            }
+        LazyColumn(modifier = Modifier.wrapContentHeight(), contentPadding = PaddingValues(all=16.dp)) {
+            headerSuperHero(characterDetailInfo.superHeroCharacter)
+            resourcesList("Comics", characterDetailInfo.comics)
+            resourcesList("Series", characterDetailInfo.series)
+            resourcesList("Stories", characterDetailInfo.stories)
+            resourcesList("events", characterDetailInfo.events)
+            resourcesList("links", characterDetailInfo.urls?.map { ItemIdentification(name=it.type, resourceURI = it.url) }, {})
         }
     }
 }
@@ -170,7 +175,10 @@ fun LazyListScope.resourcesList(title: String, list: List<ItemIdentification>? ,
             )
         }
         items(itemList.size) {
-            Text(itemList[it].name, modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth().clickable { onItemClick?.invoke() })
+            Text(itemList[it].name, modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth()
+                .clickable { onItemClick?.invoke() })
         }
     }
 }

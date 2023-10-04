@@ -10,7 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.superheroesdemo.Routes
+import com.example.superheroesdemo.Route
 import com.example.superheroesdemo.presentation.ui.theme.SuperHeroesComposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -27,14 +27,23 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun NavigationView() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Routes.SearchScreen.route) {
-        composable(route = Routes.SearchScreen.route) {
-            SearchScreen { carachterId ->
-                navController.navigate(Routes.DetailsScreenArgsValues(carachterId).route)
+    NavHost(navController = navController, startDestination = Route.SearchScreen.route) {
+        composable(route = Route.SearchScreen.route) {
+            SearchScreen { route ->
+                when (route) {
+                    is Route.DetailsScreenArgsValues -> {
+                        val carachterId = route.id
+                        navController.navigate(Route.DetailsScreenArgsValues(carachterId).route)
+                    }
+                    is Route.CardLikesScreen -> {
+                        navController.navigate(Route.CardLikesScreen.route)
+                    }
+                    else -> {} //not necessary
+                }
             }
         }
         composable(
-            route = Routes.DetailScreenArgsName("id").route,
+            route = Route.DetailScreenArgsName("id").route,
             arguments = listOf(
                 navArgument("id") {
                     type = NavType.IntType
@@ -47,6 +56,11 @@ fun NavigationView() {
                     navController.popBackStack()
                 })
             }
+        }
+        composable(route = Route.CardLikesScreen.route) {
+            CardLikesScreen(
+                onNavBack = { navController.popBackStack() }
+            )
         }
     }
 }

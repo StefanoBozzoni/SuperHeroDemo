@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.ThumbsUpDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -65,6 +66,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import coil.size.Size
 import com.example.superheroesdemo.R
+import com.example.superheroesdemo.Route
 import com.example.superheroesdemo.domain.model.SuperHeroCharacter
 import com.example.superheroesdemo.presentation.viewmodels.SearchViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -72,7 +74,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class, ExperimentalCoroutinesApi::class)
 @Composable
-fun SearchScreen(viewModelInstance: SearchViewModel = koinViewModel(), onCharacterClicked: (Int) -> Unit) {
+fun SearchScreen(viewModelInstance: SearchViewModel = koinViewModel(), onCharacterClicked: (Route) -> Unit) {
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -83,11 +85,16 @@ fun SearchScreen(viewModelInstance: SearchViewModel = koinViewModel(), onCharact
         topBar = {
             TopAppBar(
                 title = { Text("Super Heroes Demo", color = MaterialTheme.colorScheme.onBackground) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                actions = {
+                    Icon(imageVector = Icons.Rounded.ThumbsUpDown,
+                        contentDescription = null,
+                        modifier = Modifier.clickable { onCharacterClicked.invoke(Route.CardLikesScreen)  }
+                    )
+                }
             )
         },
         content = { innerPadding ->
-
             val superHeroesList: LazyPagingItems<SuperHeroCharacter> = viewModelInstance.superHeroFlow.collectAsLazyPagingItems()
             Column(Modifier.padding(innerPadding)) {
                 Text(
@@ -176,7 +183,7 @@ fun SearchScreen(viewModelInstance: SearchViewModel = koinViewModel(), onCharact
 }
 
 @Composable
-fun HeroImage(item: SuperHeroCharacter, onItemClicked: (Int) -> Unit, index:Int = -1) {
+fun HeroImage(item: SuperHeroCharacter, onItemClicked: (Route) -> Unit, index:Int = -1) {
     val url: String = item.thumbnailUrl.replace("http","https")
     val context = LocalContext.current
 
@@ -193,7 +200,7 @@ fun HeroImage(item: SuperHeroCharacter, onItemClicked: (Int) -> Unit, index:Int 
             .fillMaxWidth()
             .padding(all = 6.dp)
             .clickable {
-                onItemClicked.invoke(item.id)
+                onItemClicked.invoke(Route.DetailsScreenArgsValues(item.id))
             },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
         elevation = CardDefaults.cardElevation(12.dp)
