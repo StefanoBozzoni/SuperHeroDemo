@@ -171,6 +171,7 @@ fun LazyListScope.resourcesList(title: String, list: List<ItemIdentification>? ,
                     .fillMaxWidth()
                     .padding(bottom = 4.dp, start = 8.dp, end = 8.dp, top = 8.dp)
                     .background(MaterialTheme.colorScheme.tertiaryContainer, shape = CircleShape)
+                    .padding(bottom = 4.dp, top = 4.dp)
 
             )
         }
