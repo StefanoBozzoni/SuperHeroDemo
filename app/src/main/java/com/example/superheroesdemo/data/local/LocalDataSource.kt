@@ -21,4 +21,17 @@ class LocalDataSource(private val database: AppDatabase) {
         return (database.favoritesDao().getFavoriteCharacter(id) != null)
     }
 
+    suspend fun getPagedFavoriteItemList(isLiked:Int, startFrom: String, pageSize: Int ): List<FavoritesItem> {
+        return (database.favoritesDao().getFirstAlphabeticalFavorites(isLiked, searchKey = startFrom, pageSize))
+    }
+
+    suspend fun getNextKey(isLiked:Int, startFrom: String): String? {
+        return (database.favoritesDao().geNextAlphabeticKey(isLiked, startFrom))
+    }
+
+    suspend fun getPreviousKey(isLiked:Int, startFrom: String): String? {
+        return (database.favoritesDao().getPreviousAlphabeticKey(isLiked, startFrom))
+    }
+
+
 }

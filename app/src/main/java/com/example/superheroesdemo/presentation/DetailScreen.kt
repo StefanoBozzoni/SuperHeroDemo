@@ -47,8 +47,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.size.Size
 import com.example.superheroesdemo.R
-import com.example.superheroesdemo.data.remote.dtos.ItemIdentification
 import com.example.superheroesdemo.domain.model.CharacterDetailInfo
+import com.example.superheroesdemo.domain.model.ItemResourceInfo
 import com.example.superheroesdemo.domain.model.SuperHeroCharacter
 import com.example.superheroesdemo.presentation.ui.theme.SuperHeroesComposeTheme
 import com.example.superheroesdemo.presentation.viewmodels.DetailViewModel
@@ -93,7 +93,7 @@ fun DetailScreen(viewModelInstance: DetailViewModel = koinViewModel(), character
 fun DetailContent(characterDetailInfo: CharacterDetailInfo?, paddingValues: PaddingValues, viewModelInstance: DetailViewModel?) {
     if (characterDetailInfo == null) return
 
-    var favBtnClicked by rememberSaveable {
+    var favChecked by rememberSaveable {
         mutableStateOf(characterDetailInfo.favorite)
     }
 
@@ -104,7 +104,7 @@ fun DetailContent(characterDetailInfo: CharacterDetailInfo?, paddingValues: Padd
             resourcesList("Series", characterDetailInfo.series)
             resourcesList("Stories", characterDetailInfo.stories)
             resourcesList("events", characterDetailInfo.events)
-            resourcesList("links", characterDetailInfo.urls?.map { ItemIdentification(name=it.type, resourceURI = it.url) }, {})
+            resourcesList("links", characterDetailInfo.links, {})
         }
     }
 }
@@ -128,7 +128,7 @@ fun LazyListScope.headerSuperHero(superHero: SuperHeroCharacter) {
             val context = LocalContext.current
             val painter = remember {
                 ImageRequest.Builder(context)
-                    .data(superHero.thumbnailUrl.replace("http", "https"))
+                    .data(superHero.thumbnailUrl)
                     .placeholder(R.drawable.superhero)
                     .size(Size.ORIGINAL)
                     .crossfade(false)
@@ -158,7 +158,7 @@ fun LazyListScope.headerSuperHero(superHero: SuperHeroCharacter) {
     }
 }
 
-fun LazyListScope.resourcesList(title: String, list: List<ItemIdentification>? , onItemClick: (()->Unit)? = null) {
+fun LazyListScope.resourcesList(title: String, list: List<ItemResourceInfo>? , onItemClick: (()->Unit)? = null) {
     val itemList =list ?: emptyList()
     if (itemList.isNotEmpty()) {
         items(1) {
@@ -200,7 +200,7 @@ fun DetailScreenPreview() {
             stories = null,
             events  = null,
             comics  = null,
-            urls    = null,
+            links    = null,
             favorite= true
         )
         DetailContent(x, PaddingValues(0.dp), null)

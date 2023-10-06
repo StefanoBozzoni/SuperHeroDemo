@@ -1,14 +1,11 @@
 package com.example.superheroesdemo.domain.model
 
-import com.example.superheroesdemo.data.remote.dtos.CaractersUrl
-import com.example.superheroesdemo.data.remote.dtos.ItemIdentification
-
 class CharacterDetailInfo(
     val superHeroCharacter: SuperHeroCharacter,
-    val series:  List<ItemIdentification>?,
-    val stories: List<ItemIdentification>?,
-    val events:  List<ItemIdentification>?,
-    val comics:  List<ItemIdentification>?,
-    val urls:    List<CaractersUrl>?,
+    val series:  List<ItemResourceInfo>?,
+    val stories: List<ItemResourceInfo>?,
+    val events:  List<ItemResourceInfo>?,
+    val comics:  List<ItemResourceInfo>?,
+    val links:    List<ItemResourceInfo>?,
     var favorite: Boolean
 )

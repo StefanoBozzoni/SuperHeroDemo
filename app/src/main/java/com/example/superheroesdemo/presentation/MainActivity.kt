@@ -27,10 +27,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun NavigationView() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Route.SearchScreen.route) {
+    NavHost(navController = navController, startDestination = Route.CardLikesScreen.route) {
         composable(route = Route.SearchScreen.route) {
             SearchScreen { route ->
                 when (route) {
+                    is Route.NavigateBack -> navController.popBackStack()
                     is Route.DetailsScreenArgsValues -> {
                         val carachterId = route.id
                         navController.navigate(Route.DetailsScreenArgsValues(carachterId).route)
@@ -59,7 +60,17 @@ fun NavigationView() {
         }
         composable(route = Route.CardLikesScreen.route) {
             CardLikesScreen(
-                onNavBack = { navController.popBackStack() }
+                onNavigation = { route->
+                    when (route) {
+                        is Route.NavigateBack -> navController.popBackStack()
+                        is Route.SearchScreen -> navController.navigate(Route.SearchScreen.route)
+                        is Route.DetailsScreenArgsValues -> {
+                            val carachterId = route.id
+                            navController.navigate(Route.DetailsScreenArgsValues(carachterId).route)
+                        }
+                        else -> {}
+                    }
+                }
             )
         }
     }

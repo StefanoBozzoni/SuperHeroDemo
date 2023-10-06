@@ -18,13 +18,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.rounded.ThumbsUpDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -69,80 +70,52 @@ import com.example.superheroesdemo.R
 import com.example.superheroesdemo.Route
 import com.example.superheroesdemo.domain.model.SuperHeroCharacter
 import com.example.superheroesdemo.presentation.viewmodels.SearchViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun SearchScreen(viewModelInstance: SearchViewModel = koinViewModel(), onCharacterClicked: (Route) -> Unit) {
+fun SearchScreen(viewModelInstance: SearchViewModel = koinViewModel(), onNavigation: (Route) -> Unit) {
 
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusManager = LocalFocusManager.current
 
     var search by rememberSaveable { mutableStateOf("") }
+    var spinnerSearch by rememberSaveable { mutableStateOf("") }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Super Heroes Demo", color = MaterialTheme.colorScheme.onBackground) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                actions = {
-                    Icon(imageVector = Icons.Rounded.ThumbsUpDown,
-                        contentDescription = null,
-                        modifier = Modifier.clickable { onCharacterClicked.invoke(Route.CardLikesScreen)  }
-                    )
-                }
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            onNavigation.invoke(Route.NavigateBack)
+                        }) {
+                        Icon(Icons.Filled.ArrowBack, "backIcon")
+                    }
+                },
             )
         },
         content = { innerPadding ->
             val superHeroesList: LazyPagingItems<SuperHeroCharacter> = viewModelInstance.superHeroFlow.collectAsLazyPagingItems()
             Column(Modifier.padding(innerPadding)) {
-                Text(
-                    text = stringResource(R.string.label_explore),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 12.dp, end = 12.dp, top = 4.dp)
-                )
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 4.dp, start = 12.dp, end = 12.dp),
-                    value = search,
-                    onValueChange = {
-                        search = it
-                        viewModelInstance.getSHCharacters(search)
+                SearchBar(
+                    searchText = search,
+                    searchPinnerText = spinnerSearch,
+                    onValueChange = { text, spinnerText->
+                        search = text
+                        spinnerSearch = spinnerText.orEmpty()
+                        viewModelInstance.getSHCharacters(search, spinnerSearch)
                     },
-                    leadingIcon = { Icon(imageVector = Icons.Filled.Search, contentDescription = null) },
-                    maxLines = 1,
-                    singleLine = true,
-                    textStyle = TextStyle(fontSize = 18.sp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        disabledTextColor = Color.Transparent,
-                        focusedBorderColor = Color.Black,
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password, //it's an hack due to spellcheck issues
-                        imeAction = ImeAction.Search,
-                        autoCorrect = false
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onSearch = {
-                            keyboardController?.hide()
-                            focusManager.clearFocus()
-                        }
-                    ),
                 )
                 Surface(
-                    color = MaterialTheme.colorScheme.background, modifier = Modifier
+                    color = MaterialTheme.colorScheme.background,
+                    modifier = Modifier
                         .fillMaxSize(),
                 ) {
                     LazyColumn {
                         items(count = superHeroesList.itemCount) { index ->
                             superHeroesList[index]?.let {
-                                HeroImage(it, onCharacterClicked, index)
+                                HeroImage(it, onNavigation, index)
                             }
                         }
                         superHeroesList.apply {
@@ -150,9 +123,8 @@ fun SearchScreen(viewModelInstance: SearchViewModel = koinViewModel(), onCharact
                                 loadState.append is LoadState.Loading -> {
                                     item {
                                         Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .wrapContentHeight(), contentAlignment = Alignment.BottomCenter
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentAlignment = Alignment.BottomCenter
                                         ) {
                                             CircularProgressIndicator(Modifier.align(Alignment.Center))
                                         }
@@ -169,7 +141,10 @@ fun SearchScreen(viewModelInstance: SearchViewModel = koinViewModel(), onCharact
                             }
 
                             loadState.refresh is LoadState.Loading -> {
-                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     CircularProgressIndicator(Modifier.align(Alignment.Center))
                                 }
                             }
@@ -182,9 +157,76 @@ fun SearchScreen(viewModelInstance: SearchViewModel = koinViewModel(), onCharact
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun HeroImage(item: SuperHeroCharacter, onItemClicked: (Route) -> Unit, index:Int = -1) {
-    val url: String = item.thumbnailUrl.replace("http","https")
+fun SearchBar(searchText: String, searchPinnerText: String, onValueChange: (String, String) -> Unit) {
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row() {
+            Text(
+                text = stringResource(R.string.label_explore),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .fillMaxWidth(0.6f)
+                    .padding(start = 8.dp, end = 12.dp, top = 4.dp)
+            )
+            Text(
+                text = "Preference",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 12.dp, top = 4.dp)
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth(0.6f)
+                    .padding(start = 4.dp, bottom = 4.dp, end = 2.dp),
+                value = searchText,
+                onValueChange = { onValueChange.invoke(it, searchPinnerText) },
+                leadingIcon = { Icon(imageVector = Icons.Filled.Search, contentDescription = null) },
+                maxLines = 1,
+                singleLine = true,
+                textStyle = TextStyle(fontSize = 18.sp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = Color.Transparent,
+                    focusedBorderColor = Color.Black,
+                ),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password, //it's an hack due to spellcheck issues
+                    imeAction = ImeAction.Search,
+                    autoCorrect = false
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                    }
+                ),
+            )
+            SpinnerDemo(
+                modifier = Modifier.padding(start=2.dp, bottom = 4.dp, end = 4.dp),
+                onValueChanged = {
+                    onValueChange.invoke(searchText, it)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun HeroImage(item: SuperHeroCharacter, onItemClicked: (Route) -> Unit, index: Int = -1) {
+    val url: String = item.thumbnailUrl
     val context = LocalContext.current
 
     val model = remember {
@@ -208,9 +250,11 @@ fun HeroImage(item: SuperHeroCharacter, onItemClicked: (Route) -> Unit, index:In
         Box(
             Modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp)) {
+                .padding(vertical = 10.dp)
+        ) {
             Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(textAlign = TextAlign.Center,
+                Text(
+                    textAlign = TextAlign.Center,
                     text = item.name,
                     style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 23.sp)
                 )
@@ -247,10 +291,11 @@ fun HeroImage(item: SuperHeroCharacter, onItemClicked: (Route) -> Unit, index:In
                             .padding(12.dp),
 
                         ) {
-                        Text(text = item.description,
+                        Text(
+                            text = item.description,
                             maxLines = 3,
                             overflow = TextOverflow.Ellipsis,
-                            style = TextStyle(color= MaterialTheme.colorScheme.onPrimaryContainer, fontSize = 16.sp)
+                            style = TextStyle(color = MaterialTheme.colorScheme.onPrimaryContainer, fontSize = 16.sp)
                         )
                     }
                 }

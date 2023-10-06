@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Super Heroes Demo</string>
-    <string name="label_explore">Explore</string>
+    <string name="label_explore">Search name</string>
 </resources>
