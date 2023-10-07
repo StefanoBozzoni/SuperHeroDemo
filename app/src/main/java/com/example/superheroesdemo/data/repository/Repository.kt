@@ -36,10 +36,10 @@ internal class Repository(private val remoteDataSource: RemoteDataSource, privat
     override suspend fun getSuperHeroesCharacter(searchNameText: String): Flow<PagingData<CharactersResult>> {
         return Pager(
             config = PagingConfig(
-                pageSize = 20,
-                initialLoadSize = 40, // Initial number of items loaded
-                prefetchDistance = 10, // Number of items to prefetch
-                enablePlaceholders = false  //returns loading items as placeholders
+                pageSize = PAGINATION_PAGE_SIZE,
+                initialLoadSize = PAGINATION_INITIAL_SIZE, // Initial number of items loaded
+                prefetchDistance = PAGINATION_PREFETCH_SIZE, // Number of items to prefetch
+                enablePlaceholders = PAGINATION_ENABLE_PLACEHOLDERS  //returns loading items as placeholders
             ),
             pagingSourceFactory = {
                 CharactersPagingSource(remoteDataSource, searchNameText)
@@ -50,10 +50,10 @@ internal class Repository(private val remoteDataSource: RemoteDataSource, privat
     override suspend fun getSuperHeroesCharacterFromDB(searchNameText: String, searchPreference: String): Flow<PagingData<CharactersResult>> {
         return Pager(
             config = PagingConfig(
-                pageSize = 20,
-                initialLoadSize = 40, // Initial number of items loaded
-                prefetchDistance = 10, // Number of items to prefetch
-                enablePlaceholders = false  //returns loading items as placeholders
+                pageSize = PAGINATION_PAGE_SIZE,
+                initialLoadSize = PAGINATION_INITIAL_SIZE, // Initial number of items loaded
+                prefetchDistance = PAGINATION_PREFETCH_SIZE, // Number of items to prefetch
+                enablePlaceholders = PAGINATION_ENABLE_PLACEHOLDERS  //returns loading items as placeholders
             ),
             pagingSourceFactory = {
                 CharactersPagingSourceFromDB(localDataSource, searchNameText, searchPreference)
@@ -61,5 +61,11 @@ internal class Repository(private val remoteDataSource: RemoteDataSource, privat
         ).flow
     }
 
+    companion object {
+        const val PAGINATION_PAGE_SIZE = 20
+        const val PAGINATION_INITIAL_SIZE = 40
+        const val PAGINATION_PREFETCH_SIZE = 10
+        const val PAGINATION_ENABLE_PLACEHOLDERS = false
+    }
 
 }

@@ -6,5 +6,5 @@ class CharacterDetailInfo(
     val stories: List<ItemResourceInfo>?,
     val events:  List<ItemResourceInfo>?,
     val comics:  List<ItemResourceInfo>?,
-    val links:    List<ItemResourceInfo>?,
+    val links:   List<ItemResourceInfo>?,
 )

@@ -5,7 +5,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.example.superheroesdemo.data.local.LocalDataSource
 import com.example.superheroesdemo.data.remote.dtos.CharactersResult
-import com.example.superheroesdemo.data.remote.dtos.CharactersThumbnail
+import com.example.superheroesdemo.data.repository.Repository.Companion.PAGINATION_PAGE_SIZE
 import com.example.superheroesdemo.domain.InvalidPreferenceSearchException
 
 class CharactersPagingSourceFromDB(
@@ -13,7 +13,7 @@ class CharactersPagingSourceFromDB(
     private val searchNameText: String,
     private val searchLikeText: String
 ): PagingSource<String, CharactersResult>() {
-    val PAGE_SIZE = 20
+    val PAGE_SIZE = PAGINATION_PAGE_SIZE
     val STARTING_KEY = ""
     override fun getRefreshKey(state: PagingState<String, CharactersResult>): String? {
         return state.anchorPosition?.let { anchorPosition ->
@@ -31,28 +31,27 @@ class CharactersPagingSourceFromDB(
         return try {
             val currentKey = params.key ?: STARTING_KEY
             Log.d("XDEBUG", "current key num $currentKey")
-            val superHeroesList = localDataSource.getPagedFavoriteItemList(currentKey, searchLikeDB, searchNameText, PAGE_SIZE).map {
-                CharactersResult(
-                    id = it.id,
-                    description = "",
-                    modified = "",
-                    name = it.characterName,
-                    resourceURI = it.posterPath,
-                    thumbnail = CharactersThumbnail("",it.posterPath),
-                    series = null,
-                    stories = null,
-                    events = null,
-                    comics = null,
-                    urls = listOf(),
-                )
+
+            //get a page of PAGE_SIZE items from the DB starting from currentKey
+            val superHeroesList = localDataSource.getPagedFavoriteItemList(
+                currentKey,
+                searchLikeDB,
+                searchNameText,
+                PAGE_SIZE
+            ).map {
+                it.toCarachtersResult()
             }
 
             LoadResult.Page(
                 data = superHeroesList,
-                prevKey = if (currentKey == STARTING_KEY) null else localDataSource.getPreviousKey(currentKey, searchLikeDB, searchNameText),
-                nextKey = if (superHeroesList.size<PAGE_SIZE) {
+                prevKey = if (currentKey == STARTING_KEY) {
                     null
-                }else {
+                } else {
+                    localDataSource.getPreviousKey(currentKey, searchLikeDB, searchNameText)
+                },
+                nextKey = if (superHeroesList.size < PAGE_SIZE) {
+                    null
+                } else {
                     val lastKey = searchLikeDB.toString()+superHeroesList[superHeroesList.size - 1].name
                     localDataSource.getNextKey(lastKey, searchLikeDB, searchNameText)
                 }
