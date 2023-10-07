@@ -4,20 +4,20 @@ import com.example.superheroesdemo.data.repository.IRepository
 import com.example.superheroesdemo.domain.model.CharacterDetailInfo
 import com.example.superheroesdemo.domain.toDomain
 
-class GetSingleSuperHeroUseCase(private val remoteRepository: IRepository) {
+class GetSingleSuperHeroUseCase(
+    private val remoteRepository: IRepository,
+    private val getFavoriteStatusUseCase: GetFavoriteStatusUseCase
+) {
     suspend fun execute(params: Params): Result<CharacterDetailInfo> {
 
-        val storedFavorite = try {
-            remoteRepository.getFavoriteStatus(params.id)
-        } catch (e:Exception) {
-            return Result.failure(Exception("FAILED_RETRIEVE_FAVORITE"))
-        }
+        val isLiked = getFavoriteStatusUseCase.execute(GetFavoriteStatusUseCase.Params(params.id)).getOrThrow()
+
         remoteRepository.getSingleCharacter(params.id).fold(
             onFailure = { return Result.failure(it) },
             onSuccess = {
-                val result = it.toDomain()
-                result.favorite = storedFavorite
-                return Result.success(result)
+                val character = it.toDomain()
+                character.superHeroCharacter.isLiked = isLiked
+                return Result.success(character)
             }
         )
     }

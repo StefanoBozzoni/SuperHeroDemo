@@ -9,29 +9,25 @@ class LocalDataSource(private val database: AppDatabase) {
         database.favoritesDao().insertFavorite(favoritesItem)
     }
 
-    suspend fun deleteFavoriteItem(favoritesItem: FavoritesItem) {
-        database.favoritesDao().deleteFavorite(favoritesItem)
+    suspend fun getFavoriteItem(id: Int): Boolean? {
+        val favoriteStatus = database.favoritesDao().getFavoriteCharacter(id)
+        return when (favoriteStatus?.isLiked) {
+                1 -> true
+                0 -> false
+                else -> null
+        }
     }
 
-    suspend fun getFavoriteItemList(): List<FavoritesItem>? {
-        return database.favoritesDao().getFavoriteCarachersList()
-    }
+    suspend fun getPagedFavoriteItemList(searchKey:String, isLiked:Int, startFrom: String, pageSize: Int ): List<FavoritesItem> =
+            (database.favoritesDao().getFirstAlphabeticalFavorites(searchKey, isLiked, startFrom, pageSize))
 
-    suspend fun getFavoriteItem(id: Int): Boolean {
-        return (database.favoritesDao().getFavoriteCharacter(id) != null)
-    }
 
-    suspend fun getPagedFavoriteItemList(isLiked:Int, startFrom: String, pageSize: Int ): List<FavoritesItem> {
-        return (database.favoritesDao().getFirstAlphabeticalFavorites(isLiked, searchKey = startFrom, pageSize))
-    }
+    suspend fun getNextKey(searchKey: String, isLiked:Int, startFrom: String): String? =
+            (database.favoritesDao().geNextAlphabeticKey(searchKey, isLiked, startFrom))
 
-    suspend fun getNextKey(isLiked:Int, startFrom: String): String? {
-        return (database.favoritesDao().geNextAlphabeticKey(isLiked, startFrom))
-    }
 
-    suspend fun getPreviousKey(isLiked:Int, startFrom: String): String? {
-        return (database.favoritesDao().getPreviousAlphabeticKey(isLiked, startFrom))
-    }
+    suspend fun getPreviousKey(searchKey: String, isLiked:Int, startFrom: String): String? =
+            (database.favoritesDao().getPreviousAlphabeticKey(searchKey, isLiked, startFrom))
 
 
 }

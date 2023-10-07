@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Super Heroes Demo</string>
     <string name="label_explore">Search name</string>
+    <string name="swipe_left_for_dislike">Swipe left for dislike</string>
+    <string name="swipe_right_for_like">Swipe right for like</string>
+    <string name="swipe_the_card">Swipe the card</string>
 </resources>

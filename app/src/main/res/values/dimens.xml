@@ -1,0 +1,20 @@
+<resources>
+    <dimen name="padding_xs">2dp</dimen>
+    <dimen name="padding_s">4dp</dimen>
+    <dimen name="padding_n">8dp</dimen>
+    <dimen name="padding_xn">12dp</dimen>
+    <dimen name="padding_l">16dp</dimen>
+    <dimen name="padding_xl">24dp</dimen>
+    <dimen name="padding_xxl">36dp</dimen>
+    <dimen name="padding_xxxl">72dp</dimen>
+
+    <dimen name="round_corner_n">16dp</dimen>
+
+    <dimen name="elevation_xs">2dp</dimen>
+    <dimen name="elevation_s">4dp</dimen>
+    <dimen name="elevation_n">8dp</dimen>
+    <dimen name="elevation_l">12dp</dimen>
+
+    <dimen name="fontSize_n">16sp</dimen>
+
+</resources>

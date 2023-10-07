@@ -8,23 +8,23 @@ import com.example.superheroesdemo.domain.model.SuperHeroCharacter
 
 fun CharactersResult.toDomain(): CharacterDetailInfo =
      CharacterDetailInfo(
-         toDomain_SuperHero(),
+         toDomain_SuperHero(isLiked = false),
          series = series?.items?.map { ItemResourceInfo(it.name,it.resourceURI) }?: emptyList(),
          stories = stories?.items?.map { ItemResourceInfo(it.name,it.resourceURI) }?: emptyList(),
          events = events?.items?.map { ItemResourceInfo(it.name,it.resourceURI) }?: emptyList(),
          comics = comics?.items?.map { ItemResourceInfo(it.name,it.resourceURI) }?: emptyList(),
          links = urls?.map { ItemResourceInfo(it.type,it.url) }?: emptyList(),
-         favorite = false,
      )
 
 
-fun CharactersResult.toDomain_SuperHero(): SuperHeroCharacter =
+fun CharactersResult.toDomain_SuperHero(isLiked: Boolean? = null): SuperHeroCharacter =
         SuperHeroCharacter(
             id = id,
             description = description,
             name = name,
             resourceURI = resourceURI,
-            thumbnailUrl = "${thumbnail.path}${if (thumbnail.extension.isBlank()) "" else "."}${thumbnail.extension}".replace("http://","https://")
+            thumbnailUrl = "${thumbnail.path}${if (thumbnail.extension.isBlank()) "" else "."}${thumbnail.extension}".replace("http://","https://"),
+            isLiked = isLiked
         )
 
 fun SuperHeroCharacter.toFavItemData(checked: Boolean): FavoritesItem =

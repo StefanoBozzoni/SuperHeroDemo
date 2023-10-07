@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -20,20 +21,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.sp
 
 @Composable
-fun SpinnerDemo(modifier: Modifier = Modifier, onValueChanged: (String) -> Unit) {
+fun Spinner(modifier: Modifier = Modifier, value: String, items: List<String>, onValueChanged: (String) -> Unit) {
     var isDropdownExpanded by remember { mutableStateOf(false) }
-    val items = listOf("Any", "Likes", "Dislikes")
-    var selectedItem by remember { mutableStateOf(items[0]) }
+    var selectedItem by remember { mutableStateOf(value.ifEmpty { items[0]}) }
 
     Box(
         modifier = Modifier
             .then(modifier)
-            //.border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(4.dp)),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -53,20 +50,20 @@ fun SpinnerDemo(modifier: Modifier = Modifier, onValueChanged: (String) -> Unit)
                 leadingIcon = { Icon(imageVector = Icons.Filled.Search, contentDescription = null, tint = Color.Black) },
                 readOnly = true,
                 enabled = false,
-                textStyle = TextStyle(fontSize = 18.sp).copy(color = Color.Black)
+                textStyle = typography.bodyLarge.copy(color = Color.Black)
             )
         }
 
         if (isDropdownExpanded) {
             DropdownMenu(
-                expanded = isDropdownExpanded,
+                expanded = true,
                 onDismissRequest = {
                     isDropdownExpanded = false
                 }
             ) {
                 items.forEach { item ->
                     DropdownMenuItem(
-                        text = { Text(item, style = TextStyle(fontSize = 18.sp)) },
+                        text = { Text(item, style = typography.bodyLarge) },
                         onClick = {
                             selectedItem = item
                             isDropdownExpanded = false

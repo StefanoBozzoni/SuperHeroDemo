@@ -26,7 +26,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -50,16 +51,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -69,6 +69,7 @@ import coil.size.Size
 import com.example.superheroesdemo.R
 import com.example.superheroesdemo.Route
 import com.example.superheroesdemo.domain.model.SuperHeroCharacter
+import com.example.superheroesdemo.presentation.model.PreferencesType
 import com.example.superheroesdemo.presentation.viewmodels.SearchViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -76,15 +77,14 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SearchScreen(viewModelInstance: SearchViewModel = koinViewModel(), onNavigation: (Route) -> Unit) {
 
-
     var search by rememberSaveable { mutableStateOf("") }
-    var spinnerSearch by rememberSaveable { mutableStateOf("") }
+    var spinnerSearch by rememberSaveable { mutableStateOf(PreferencesType.Any) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Super Heroes Demo", color = MaterialTheme.colorScheme.onBackground) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                title = { Text("Super Heroes Demo", color = colorScheme.onBackground) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.primaryContainer),
                 navigationIcon = {
                     IconButton(
                         onClick = {
@@ -100,34 +100,32 @@ fun SearchScreen(viewModelInstance: SearchViewModel = koinViewModel(), onNavigat
             Column(Modifier.padding(innerPadding)) {
                 SearchBar(
                     searchText = search,
-                    searchPinnerText = spinnerSearch,
-                    onValueChange = { text, spinnerText->
+                    searchPinnerText = spinnerSearch.text,
+                    onValueChange = { text, spinnerText ->
                         search = text
-                        spinnerSearch = spinnerText.orEmpty()
+                        spinnerSearch = PreferencesType.fromText(spinnerText)
                         viewModelInstance.getSHCharacters(search, spinnerSearch)
                     },
                 )
                 Surface(
-                    color = MaterialTheme.colorScheme.background,
+                    color = colorScheme.background,
                     modifier = Modifier
                         .fillMaxSize(),
                 ) {
                     LazyColumn {
                         items(count = superHeroesList.itemCount) { index ->
-                            superHeroesList[index]?.let {
-                                HeroImage(it, onNavigation, index)
+                            superHeroesList[index]?.let { superHeroItem ->
+                                HeroImage(superHeroItem, onNavigation)
                             }
                         }
                         superHeroesList.apply {
-                            when {
-                                loadState.append is LoadState.Loading -> {
-                                    item {
-                                        Box(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            contentAlignment = Alignment.BottomCenter
-                                        ) {
-                                            CircularProgressIndicator(Modifier.align(Alignment.Center))
-                                        }
+                            if (loadState.append is LoadState.Loading) {
+                                item {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.BottomCenter
+                                    ) {
+                                        CircularProgressIndicator(Modifier.align(Alignment.Center))
                                     }
                                 }
                             }
@@ -168,21 +166,21 @@ fun SearchBar(searchText: String, searchPinnerText: String, onValueChange: (Stri
         Row() {
             Text(
                 text = stringResource(R.string.label_explore),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary,
+                style = typography.headlineSmall,
+                color = colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .fillMaxWidth(0.6f)
-                    .padding(start = 8.dp, end = 12.dp, top = 4.dp)
+                    .padding(start = dimensionResource(R.dimen.padding_n), end = dimensionResource(R.dimen.padding_xn), top = dimensionResource(R.dimen.padding_s))
             )
             Text(
                 text = "Preference",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary,
+                style = typography.headlineSmall,
+                color = colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 12.dp, top = 4.dp)
+                    .padding(end = dimensionResource(R.dimen.padding_xn), top = dimensionResource(R.dimen.padding_s))
             )
         }
         Row(
@@ -191,13 +189,13 @@ fun SearchBar(searchText: String, searchPinnerText: String, onValueChange: (Stri
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth(0.6f)
-                    .padding(start = 4.dp, bottom = 4.dp, end = 2.dp),
+                    .padding(start = dimensionResource(R.dimen.padding_s), bottom = dimensionResource(R.dimen.padding_s), end = dimensionResource(R.dimen.padding_xs)),
                 value = searchText,
                 onValueChange = { onValueChange.invoke(it, searchPinnerText) },
                 leadingIcon = { Icon(imageVector = Icons.Filled.Search, contentDescription = null) },
                 maxLines = 1,
                 singleLine = true,
-                textStyle = TextStyle(fontSize = 18.sp),
+                textStyle = typography.bodyLarge, //TextStyle(fontSize = 18.sp),
                 colors = OutlinedTextFieldDefaults.colors(
                     disabledTextColor = Color.Transparent,
                     focusedBorderColor = Color.Black,
@@ -214,8 +212,10 @@ fun SearchBar(searchText: String, searchPinnerText: String, onValueChange: (Stri
                     }
                 ),
             )
-            SpinnerDemo(
-                modifier = Modifier.padding(start=2.dp, bottom = 4.dp, end = 4.dp),
+            Spinner(
+                modifier = Modifier.padding(start = dimensionResource(R.dimen.padding_xs), bottom = dimensionResource(R.dimen.padding_s), end = dimensionResource(R.dimen.padding_s)),
+                value = searchPinnerText,
+                items = PreferencesType.values().map { it.text },
                 onValueChanged = {
                     onValueChange.invoke(searchText, it)
                 }
@@ -225,7 +225,7 @@ fun SearchBar(searchText: String, searchPinnerText: String, onValueChange: (Stri
 }
 
 @Composable
-fun HeroImage(item: SuperHeroCharacter, onItemClicked: (Route) -> Unit, index: Int = -1) {
+fun HeroImage(item: SuperHeroCharacter, onItemClicked: (Route) -> Unit) {
     val url: String = item.thumbnailUrl
     val context = LocalContext.current
 
@@ -240,30 +240,30 @@ fun HeroImage(item: SuperHeroCharacter, onItemClicked: (Route) -> Unit, index: I
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(all = 6.dp)
+            .padding(all = dimensionResource(R.dimen.padding_n))
             .clickable {
                 onItemClicked.invoke(Route.DetailsScreenArgsValues(item.id))
             },
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-        elevation = CardDefaults.cardElevation(12.dp)
+        colors = CardDefaults.cardColors(containerColor = colorScheme.secondaryContainer),
+        elevation = CardDefaults.cardElevation(dimensionResource(R.dimen.elevation_n))
     ) {
         Box(
             Modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp)
+                .padding(vertical = dimensionResource(R.dimen.padding_xn))
         ) {
             Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     textAlign = TextAlign.Center,
                     text = item.name,
-                    style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 23.sp)
+                    style = typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
                 Card(
                     modifier = Modifier
                         .padding(6.dp)
                         .fillMaxWidth(fraction = 0.8f)
                         .wrapContentHeight(),
-                    elevation = CardDefaults.cardElevation(2.dp)
+                    elevation = CardDefaults.cardElevation(dimensionResource(R.dimen.elevation_xs))
                 ) {
                     SubcomposeAsyncImage(
                         modifier = Modifier
@@ -284,18 +284,18 @@ fun HeroImage(item: SuperHeroCharacter, onItemClicked: (Route) -> Unit, index: I
                 if (item.description.isNotBlank()) {
                     Box(
                         modifier = Modifier
-                            .padding(6.dp)
+                            .padding(dimensionResource(R.dimen.padding_n))
                             .fillMaxWidth(fraction = 1f)
                             .wrapContentHeight()
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                            .padding(12.dp),
+                            .background(colorScheme.primaryContainer)
+                            .padding(dimensionResource(R.dimen.padding_xn)),
 
                         ) {
                         Text(
                             text = item.description,
                             maxLines = 3,
                             overflow = TextOverflow.Ellipsis,
-                            style = TextStyle(color = MaterialTheme.colorScheme.onPrimaryContainer, fontSize = 16.sp)
+                            style = typography.bodyLarge.copy(color = colorScheme.onPrimaryContainer)
                         )
                     }
                 }
@@ -307,9 +307,9 @@ fun HeroImage(item: SuperHeroCharacter, onItemClicked: (Route) -> Unit, index: I
 @Composable
 fun ErrorContent(message: String) {
     Card(
-        elevation = CardDefaults.cardElevation(2.dp),
+        elevation = CardDefaults.cardElevation(dimensionResource(R.dimen.elevation_xs)),
         modifier = Modifier
-            .padding(6.dp)
+            .padding(dimensionResource(R.dimen.padding_n))
             .fillMaxWidth()
             .wrapContentHeight()
     ) {
@@ -317,7 +317,7 @@ fun ErrorContent(message: String) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Red)
-                .padding(8.dp)
+                .padding(dimensionResource(R.dimen.padding_n))
         ) {
             Image(
                 modifier = Modifier
@@ -331,9 +331,9 @@ fun ErrorContent(message: String) {
             Text(
                 color = Color.White,
                 text = message,
-                fontSize = 16.sp,
+                style = typography.bodyLarge,
                 modifier = Modifier
-                    .padding(start = 12.dp)
+                    .padding(start = dimensionResource(R.dimen.padding_xn))
                     .align(Alignment.CenterVertically)
             )
         }

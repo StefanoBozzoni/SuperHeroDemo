@@ -8,10 +8,8 @@ class DetailViewModel(
     private val getSingleSuperHeroUseCase: GetSingleSuperHeroUseCase
 ): ViewModel() {
 
-    suspend fun suspendGetSingleSuperHero(id: Int): CharacterDetailInfo {
-        return getSingleSuperHeroUseCase.execute(GetSingleSuperHeroUseCase.Params(id)).getOrElse {
-            throw it
-        }
+    suspend fun suspendGetSingleSuperHero(id: Int): Result<CharacterDetailInfo> {
+        return getSingleSuperHeroUseCase.execute(GetSingleSuperHeroUseCase.Params(id))
     }
 
 }

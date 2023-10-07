@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import com.example.superheroesdemo.data.local.LocalDataSource
 import com.example.superheroesdemo.data.remote.dtos.CharactersResult
 import com.example.superheroesdemo.data.remote.dtos.CharactersThumbnail
+import com.example.superheroesdemo.domain.InvalidPreferenceSearchException
 
 class CharactersPagingSourceFromDB(
     private val localDataSource: LocalDataSource,
@@ -13,7 +14,7 @@ class CharactersPagingSourceFromDB(
     private val searchLikeText: String
 ): PagingSource<String, CharactersResult>() {
     val PAGE_SIZE = 20
-    val STARTING_KEY = "0"
+    val STARTING_KEY = ""
     override fun getRefreshKey(state: PagingState<String, CharactersResult>): String? {
         return state.anchorPosition?.let { anchorPosition ->
             state.closestPageToPosition(anchorPosition)?.prevKey ?: state.closestPageToPosition(anchorPosition)?.nextKey
@@ -24,13 +25,13 @@ class CharactersPagingSourceFromDB(
         val searchLikeDB: Int = when(searchLikeText) {
             "Likes" -> 1
             "Dislikes" -> 0
-            else -> throw Exception("Invalid DB search for preference")
+            else -> throw InvalidPreferenceSearchException()
         }
 
         return try {
             val currentKey = params.key ?: STARTING_KEY
             Log.d("XDEBUG", "current key num $currentKey")
-            val superHeroesList = localDataSource.getPagedFavoriteItemList(searchLikeDB, searchNameText, PAGE_SIZE).map {
+            val superHeroesList = localDataSource.getPagedFavoriteItemList(currentKey, searchLikeDB, searchNameText, PAGE_SIZE).map {
                 CharactersResult(
                     id = it.id,
                     description = "",
@@ -48,8 +49,13 @@ class CharactersPagingSourceFromDB(
 
             LoadResult.Page(
                 data = superHeroesList,
-                prevKey = if (currentKey == STARTING_KEY) null else localDataSource.getPreviousKey(searchLikeDB, currentKey),
-                nextKey = if (superHeroesList.size<PAGE_SIZE) null else localDataSource.getNextKey(searchLikeDB, currentKey),
+                prevKey = if (currentKey == STARTING_KEY) null else localDataSource.getPreviousKey(currentKey, searchLikeDB, searchNameText),
+                nextKey = if (superHeroesList.size<PAGE_SIZE) {
+                    null
+                }else {
+                    val lastKey = searchLikeDB.toString()+superHeroesList[superHeroesList.size - 1].name
+                    localDataSource.getNextKey(lastKey, searchLikeDB, searchNameText)
+                }
             )
         } catch (e: Exception) {
             LoadResult.Error(e)

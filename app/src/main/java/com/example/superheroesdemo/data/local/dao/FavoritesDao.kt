@@ -15,24 +15,22 @@ abstract class FavoritesDao {
     @Query("SELECT count(*) FROM " + TABLE_FAVORITES)
     abstract suspend fun countTests(): Int
 
-    @Query("SELECT * FROM ${TABLE_FAVORITES}")
-    abstract suspend fun getFavoriteCarachersList(): List<FavoritesItem>?
-
     @Query("SELECT * FROM ${TABLE_FAVORITES} where id=:id")
     abstract suspend fun getFavoriteCharacter(id:Int): FavoritesItem?
 
     @Query("DELETE FROM ${TABLE_FAVORITES}")
     abstract suspend fun clearFavoritesTable()
 
-    @Query("SELECT * FROM ${TABLE_FAVORITES} WHERE isLiked || characterName >= :isLiked || :searchKey AND isLiked = :isLiked "+
-           "AND characterName LIKE :searchKey||'%' ORDER BY characterName ASC LIMIT :pageSize")
-    abstract fun getFirstAlphabeticalFavorites(isLiked: Int, searchKey: String, pageSize: Int): List<FavoritesItem>
+    //AND characterName LIKE :searchName||'%'
+    @Query("SELECT * FROM ${TABLE_FAVORITES} WHERE (isLiked||characterName) >= :searchKey AND isLiked = :isLiked "+
+           " AND characterName LIKE :searchName||'%' ORDER BY isLiked, characterName ASC LIMIT :pageSize")
+    abstract suspend fun getFirstAlphabeticalFavorites(searchKey: String, isLiked: Int, searchName: String, pageSize: Int): List<FavoritesItem>
 
-    @Query("SELECT isLiked || characterName FROM ${TABLE_FAVORITES} WHERE isLiked || characterName > :searchKey "+
-           "AND isLiked = :isLiked AND characterName LIKE :searchKey||'%' ORDER BY characterName ASC LIMIT 1")
-    abstract fun geNextAlphabeticKey(isLiked: Int, searchKey: String): String?
+    @Query("SELECT isLiked||characterName FROM ${TABLE_FAVORITES} WHERE (isLiked || characterName) > :searchKey "+
+           "AND isLiked = :isLiked AND characterName LIKE (:searchName||'%') ORDER BY isLiked, characterName ASC LIMIT 1")
+    abstract suspend fun geNextAlphabeticKey(searchKey: String, isLiked: Int, searchName: String): String?
 
     @Query("SELECT isLiked || characterName FROM ${TABLE_FAVORITES} WHERE isLiked || characterName < :searchKey "+
-           "AND isLiked = :isLiked AND characterName LIKE :searchKey||'%' ORDER BY characterName DESC LIMIT 1")
-    abstract fun getPreviousAlphabeticKey(isLiked: Int, searchKey: String): String?
+           "AND isLiked = :isLiked AND characterName LIKE :searchName||'%' ORDER BY isLiked, characterName DESC LIMIT 1")
+    abstract suspend fun getPreviousAlphabeticKey(searchKey: String, isLiked: Int, searchName: String): String?
 }

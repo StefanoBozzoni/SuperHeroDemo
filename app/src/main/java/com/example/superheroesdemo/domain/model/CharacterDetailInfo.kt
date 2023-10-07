@@ -7,5 +7,4 @@ class CharacterDetailInfo(
     val events:  List<ItemResourceInfo>?,
     val comics:  List<ItemResourceInfo>?,
     val links:    List<ItemResourceInfo>?,
-    var favorite: Boolean
 )

@@ -16,5 +16,8 @@ val remoteModule = module {
     single(named("APP_SERVICE")) {
         AppServiceFactory(get(named("HTTP_CLIENT"))).getAppService(get(named("SERVICE_FACTORY")))
     }
-    single<IRepository> { Repository(get(named("APP_SERVICE")), localDataSource = get(named("LOCAL_DATA_SOURCE"))) }
+    single<IRepository> { Repository(
+        remoteDataSource = get(named("REMOTE_DATA_SOURCE")),
+        localDataSource = get(named("LOCAL_DATA_SOURCE")))
+    }
 }

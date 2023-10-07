@@ -3,11 +3,11 @@ package com.example.superheroesdemo.domain.pagination
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.example.superheroesdemo.data.remote.AppService
+import com.example.superheroesdemo.data.local.RemoteDataSource
 import com.example.superheroesdemo.data.remote.dtos.CharactersResult
 
 class CharactersPagingSource(
-    private val appService: AppService,
+    private val remoteDataSource: RemoteDataSource,
     private val query: String
 ): PagingSource<Int, CharactersResult>() {
 
@@ -23,7 +23,7 @@ class CharactersPagingSource(
         return try {
             val page = params.key ?: STARTING_PAGE
             Log.d("XDEBUG", "page num $page")
-            val superHeroesList = appService.getCharacters(searchText = query.ifEmpty { null }, offset = page * 20, limit = 20).body()?.data?.results.orEmpty()
+            val superHeroesList = remoteDataSource.appService.getCharacters(searchText = query.ifEmpty { null }, offset = page * 20, limit = 20).body()?.data?.results.orEmpty()
             LoadResult.Page(
                 data = superHeroesList,
                 prevKey = if (page == STARTING_PAGE) null else page.minus(1),
