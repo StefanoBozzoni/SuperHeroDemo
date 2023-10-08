@@ -25,18 +25,18 @@ class CardLikesViewModel(
     val showThumbUp = MutableStateFlow(RefreshEvent(false))
 
     init {
-        getSHCharacters("", true)
+        getSHCharacters()
     }
 
     fun resetFlow() {
         _superHeroFlow = MutableStateFlow(PagingData.empty())
     }
 
-    fun getSHCharacters(searchNameText: String, retrieveIsLikedInfo: Boolean) {
+    fun getSHCharacters() {
         viewModelScope.launch(Dispatchers.IO) {
             resetFlow()
             getSuperHeroUC.execute(
-                    GetSuperHeroesUsecase.Params(searchNameText = searchNameText, retrieveIsLikedInfo = retrieveIsLikedInfo)
+                    GetSuperHeroesUsecase.Params(searchNameText="", retrieveIsLikedInfo = true)
             ).cachedIn(this)
              .collect { _superHeroFlow.emit(it) }
         }
