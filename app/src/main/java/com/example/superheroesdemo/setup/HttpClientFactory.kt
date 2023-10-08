@@ -11,7 +11,7 @@ class HttpClientFactory(private val baseDomain: String, private val certificates
             .writeTimeout(10, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS)
 
-        if (certificatesPins.size!=0) builder.certificatePinner(createCertificatePinner())
+        if (certificatesPins.isNotEmpty()) builder.certificatePinner(createCertificatePinner())
 
         if (BuildConfig.DEBUG)
             builder.addNetworkInterceptor(NetworkModule.createHttpLoggingInterceptor())

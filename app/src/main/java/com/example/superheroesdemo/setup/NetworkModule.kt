@@ -19,7 +19,7 @@ object NetworkModule {
         val timeStamp = (System.currentTimeMillis() / 1000).toString()
         val hash = getHashMd5(timeStamp, apiKey)
 
-        val modifiedurl = it.request().url
+        val modifiedUrl = it.request().url
             .newBuilder()
             .addQueryParameter("ts",timeStamp)
             .addQueryParameter("apikey",apiKey)
@@ -28,7 +28,7 @@ object NetworkModule {
 
         val request = it.request().newBuilder()
             .addHeader("Content-Type", "application/json")
-            .url(modifiedurl)
+            .url(modifiedUrl)
             .build()
         it.proceed(request)
     }

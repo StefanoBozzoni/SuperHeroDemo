@@ -53,7 +53,7 @@ fun NavigationView() {
             )
         ) {
             it.arguments?.getInt("id")?.let { itemId->
-                DetailScreen(characterId = itemId, onNavBack = {
+                DetailScreen(onNavBack = {
                     navController.popBackStack()
                 })
             }

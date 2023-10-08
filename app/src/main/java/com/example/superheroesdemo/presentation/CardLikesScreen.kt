@@ -76,17 +76,16 @@ import com.example.superheroesdemo.presentation.model.RefreshEvent
 import com.example.superheroesdemo.presentation.ui.theme.SuperHeroesComposeTheme
 import com.example.superheroesdemo.presentation.viewmodels.CardLikesViewModel
 import com.haroncode.lazycardstack.LazyCardStack
+import com.haroncode.lazycardstack.LazyCardStackState
 import com.haroncode.lazycardstack.rememberLazyCardStackState
 import com.haroncode.lazycardstack.swiper.SwipeDirection
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardLikesScreen(viewModelInstance: CardLikesViewModel = koinViewModel(), onNavigation: (Route) -> Unit) {
-    val isVisible: StateFlow<RefreshEvent> = viewModelInstance.showThumbUp
     val coroutineScope = rememberCoroutineScope()
     val cardStackState = rememberLazyCardStackState()
 
@@ -171,42 +170,18 @@ fun CardLikesScreen(viewModelInstance: CardLikesViewModel = koinViewModel(), onN
                             if ((cardStackState.itemsCount != 0) &&
                                 (cardStackState.visibleItemIndex > cardStackState.itemsCount-1)
                             ) {
-                                Column(
-                                    modifier= Modifier.fillMaxSize(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                       verticalArrangement = Arrangement.Center
-                                ) {
-                                    Text(
-                                        modifier = Modifier
-                                            .padding(dimensionResource(R.dimen.padding_l)),
-                                        text = "No more cards"
-                                    )
-                                    ElevatedButton(
-                                        onClick = {
-                                            coroutineScope.launch {
-                                                cardStackState.snapTo(0)
-                                            }
-                                        },
-                                    )
-                                    {
-                                        Text(text = "Restart")
-                                    }
-                                }
+                                NoMoreCardsComposable(cardStackState)
                             } else {
-                                Text(
-                                    modifier = Modifier
-                                        .padding(dimensionResource(R.dimen.padding_l))
-                                        .fillMaxSize(),
-                                    text = "Loading..."
-                                )
+                                LoadingCardComposable()
                             }
                         }
                     }
                 }
+
                 BottomSheetInstructions()
             }
 
-            val state = isVisible.collectAsStateWithLifecycle()
+            val state = viewModelInstance.showThumbUp.collectAsStateWithLifecycle()
             if (state.value.refresh) {
                 ThumbUpIconAnimation(
                     modifier = Modifier.padding(paddingValues),
@@ -221,6 +196,42 @@ fun CardLikesScreen(viewModelInstance: CardLikesViewModel = koinViewModel(), onN
 }
 
 @Composable
+private fun LoadingCardComposable() {
+    Text(
+        modifier = Modifier
+            .padding(dimensionResource(R.dimen.padding_l))
+            .fillMaxSize(),
+        text = "Loading..."
+    )
+}
+
+@Composable
+private fun NoMoreCardsComposable(cardStackState: LazyCardStackState) {
+    val coroutineScope = rememberCoroutineScope()
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            modifier = Modifier
+                .padding(dimensionResource(R.dimen.padding_l)),
+            text = "No more cards"
+        )
+        ElevatedButton(
+            onClick = {
+                coroutineScope.launch {
+                    cardStackState.snapTo(0)
+                }
+            },
+        )
+        {
+            Text(text = "Restart")
+        }
+    }
+}
+
+@Composable
 fun BottomSheetInstructions() {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -228,7 +239,7 @@ fun BottomSheetInstructions() {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(colorScheme.inversePrimary),
-            style = typography.bodyLarge.copy(textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+            style = typography.titleLarge.copy(textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
         )
         Row(
             modifier = Modifier
