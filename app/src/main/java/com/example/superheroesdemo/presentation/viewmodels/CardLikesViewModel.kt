@@ -28,9 +28,13 @@ class CardLikesViewModel(
         getSHCharacters("", true)
     }
 
+    fun resetFlow() {
+        _superHeroFlow = MutableStateFlow(PagingData.empty())
+    }
+
     fun getSHCharacters(searchNameText: String, retrieveIsLikedInfo: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
-            _superHeroFlow =  MutableStateFlow(PagingData.empty())
+            resetFlow()
             getSuperHeroUC.execute(
                     GetSuperHeroesUsecase.Params(searchNameText = searchNameText, retrieveIsLikedInfo = retrieveIsLikedInfo)
             ).cachedIn(this)
