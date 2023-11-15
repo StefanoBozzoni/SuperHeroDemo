@@ -10,7 +10,9 @@ class GetSingleSuperHeroUseCase(
 ) {
     suspend fun execute(params: Params): Result<CharacterDetailInfo> {
 
-        val isLiked = getFavoriteStatusUseCase.execute(GetFavoriteStatusUseCase.Params(params.id)).getOrThrow()
+        val isLiked = getFavoriteStatusUseCase.execute(GetFavoriteStatusUseCase.Params(params.id)).getOrElse {
+            return Result.failure(it)
+        }
 
         remoteRepository.getSingleCharacter(params.id).fold(
             onFailure = { return Result.failure(it) },

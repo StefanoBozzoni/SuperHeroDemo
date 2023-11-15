@@ -100,8 +100,8 @@ fun CardLikesScreen(viewModelInstance: CardLikesViewModel = koinViewModel(), onN
                 actions = {
                     IconButton(
                         onClick = {
+                            viewModelInstance.getSHCharacters()
                             coroutineScope.launch {
-                                viewModelInstance.getSHCharacters()
                                 shouldRecreatecardStackState = cardStackState.visibleItemIndex
                                 cardStackState.snapTo(0)
                             }
