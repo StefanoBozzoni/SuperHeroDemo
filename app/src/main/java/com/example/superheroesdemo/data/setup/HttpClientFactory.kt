@@ -1,4 +1,4 @@
-package com.example.superheroesdemo.setup
+package com.example.superheroesdemo.data.setup
 
 import com.example.superheroesdemo.BuildConfig
 import okhttp3.CertificatePinner

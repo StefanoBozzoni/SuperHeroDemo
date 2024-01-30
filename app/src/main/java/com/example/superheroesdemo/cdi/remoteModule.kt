@@ -2,9 +2,9 @@ package com.example.superheroesdemo.cdi
 
 import com.example.superheroesdemo.cdi.EnvironmentConfig.BASE_DOMAIN
 import com.example.superheroesdemo.cdi.EnvironmentConfig.allowedSSlFingerprints
-import com.example.superheroesdemo.setup.AppServiceFactory
-import com.example.superheroesdemo.setup.HttpClientFactory
-import com.example.superheroesdemo.setup.ServiceFactory
+import com.example.superheroesdemo.data.setup.AppServiceFactory
+import com.example.superheroesdemo.data.setup.HttpClientFactory
+import com.example.superheroesdemo.data.setup.ServiceFactory
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
